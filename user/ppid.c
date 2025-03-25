@@ -6,7 +6,7 @@ int main() {
     int pid = getpid();     // 현재 프로세스의 PID
     int ppid = getppid();   // 부모 프로세스의 PID
 
-    printf("My student ID is 2025123456\n");
+    printf("My student ID is 2022058740\n");
     printf("My pid is %d\n", pid);
     printf("My ppid is %d\n", ppid);
 
