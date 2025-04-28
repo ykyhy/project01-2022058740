@@ -137,7 +137,7 @@ sys_setpriority(void)
         return -2;
 
     acquire(&ptable_lock);
-    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+    for (p = proc; p < &proc[NPROC]; p++) {
         if (p->pid == pid) {
             p->priority = priority;
             release(&ptable_lock);
@@ -159,7 +159,7 @@ sys_mlfqmode(void)
     acquire(&ptable_lock);
     scheduler_mode = MLFQ_MODE;
 
-    for (struct proc *p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+    for (struct proc *p = proc; p < &proc[NPROC]; p++) {
         if (p->state != UNUSED) {
             p->priority = 3;
             p->level = 0;
@@ -183,7 +183,7 @@ sys_fcfsmode(void)
     acquire(&ptable_lock);
     scheduler_mode = FCFS_MODE;
 
-    for (struct proc *p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+    for (struct proc *p = proc; p < &proc[NPROC]; p++) {
         if (p->state != UNUSED) {
             p->priority = -1;
             p->level = -1;
