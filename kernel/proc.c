@@ -453,6 +453,7 @@ scheduler(void)
 {
   struct proc *p;
   struct cpu *c = mycpu();
+  int tick_conut = 0;
 
   c->proc = 0;
   for(;;){
@@ -493,36 +494,40 @@ scheduler(void)
       }
     }
 	else if (scheduler_mode == MLFQ_MODE) {
-       struct proc *selected = 0;
-
-    // 높은 레벨(L0)부터 낮은 레벨(L2)까지 순서대로 검색
-    for (int level = 0; level <= 2; level++) {
-      for (p = proc; p < &proc[NPROC]; p++) {
-        acquire(&p->lock);
-        if (p->state == RUNNABLE && p->level == level) {
-          selected = p;
-          break;  // 가장 먼저 발견한 RUNNABLE 프로세스 선택
-        }
-        release(&p->lock);
+      if (tick_count >= 50) {
+          acquire(&ptable_lock);
+          for (p = proc; p < &proc[NPROC]; p++) {
+              acquire(&p->lock);
+              if (p->state != UNUSED) {
+                  p->level = 0;
+                  p->priority = 3;
+                  p->time_quantum = 0;
+              }
+              release(&p->lock);
+          }
+          tick_count = 0;
+          release(&ptable_lock);
       }
-      if (selected)
-        break;  // 이미 선택했으면 더 검색할 필요 없음
-    }
-
-    if (selected) {
-      // 실행 직전
+      struct proc *selected = 0; // 높은 레벨(L0)부터 낮은 레벨(L2)까지 순서대로 검색
+      for (int level = 0; level <= 2; level++) {
+        for (p = proc; p < &proc[NPROC]; p++) {
+          acquire(&p->lock);
+          if (p->state == RUNNABLE && p->level == level) {
+            selected = p;
+            break;  // 가장 먼저 발견한 RUNNABLE 프로세스 선택
+          }
+          release(&p->lock);
+        }
+        if (selected)
+          break;  // 이미 선택했으면 더 검색할 필요 없음
+      }
+	  if (selected) {// 실행 직전
       selected->state = RUNNING;
       c->proc = selected;
       swtch(&c->context, &selected->context);
       c->proc = 0;
-
-      // 실행이 끝난 후
-      // (프로세스가 RUNNABLE로 돌아왔을 때 time_quantum을 관리해야 함)
-      // 이 부분은 yield() 안에서 다룰 수도 있는데, 여기서는 스케줄러에서 관리하는 방식으로 가자
-
       if (selected->state == RUNNABLE) {
         selected->time_quantum++;
-
         // 레벨 별 타임퀀텀 초과 시 레벨 다운
         if (selected->level == 0 && selected->time_quantum >= 4) {
           selected->level = 1;
@@ -540,7 +545,7 @@ scheduler(void)
       asm volatile("wfi");
     }
   }
-
+ 
     //int found = 0;
     //for(p = proc; p < &proc[NPROC]; p++) {
       //acquire(&p->lock);
