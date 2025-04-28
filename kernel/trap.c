@@ -169,7 +169,7 @@ clockintr()
   if(cpuid() == 0){
     acquire(&tickslock);
     ticks++;
-	tick_count++;
+    tick_count++;
     wakeup(&ticks);
     release(&tickslock);
   }
