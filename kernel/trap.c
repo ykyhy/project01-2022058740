@@ -155,6 +155,8 @@ kerneltrap()
   if(which_dev == 2 && myproc() != 0)
     yield();
 
+  if (which_dev == 2)
+    clockintr();
   // the yield() may have caused some traps to occur,
   // so restore trap registers for use by kernelvec.S's sepc instruction.
   w_sepc(sepc);
