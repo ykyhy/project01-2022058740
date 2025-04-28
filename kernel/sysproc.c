@@ -97,3 +97,94 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64
+sys_yield(void)
+{
+    yield();
+    return 0;
+}
+
+uint64
+sys_getlev(void)
+{
+    struct proc *p = myproc();
+    if (scheduler_mode == FCFS_MODE)  // FCFS_MODE는 define해놓거나 0으로 설정
+        return 99;
+    return p->level;
+}
+
+uint64
+sys_setpriority(void)
+{
+    int pid, priority;
+    struct proc *p;
+
+    // 인자 받아오기
+    if (argint(0, &pid) < 0 || argint(1, &priority) < 0)
+        return -1;
+
+    // priority 범위 검사
+    if (priority < 0 || priority > 3)
+        return -2;
+
+    acquire(&ptable.lock);
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if (p->pid == pid) {
+            p->priority = priority;
+            release(&ptable.lock);
+            return 0;
+        }
+    }
+    release(&ptable.lock);
+    return -1;  // 프로세스 못 찾음
+}
+
+uint64
+sys_mlfqmode(void)
+{
+    if (scheduler_mode == MLFQ_MODE) {
+        printf("Already in MLFQ mode.\n");
+        return -1;
+    }
+
+    acquire(&ptable.lock);
+    scheduler_mode = MLFQ_MODE;
+
+    for (struct proc *p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if (p->state != UNUSED) {
+            p->priority = 3;
+            p->level = 0;
+            p->time_quantum = 0;
+        }
+    }
+    tick_count = 0; // 글로벌 tick 초기화
+    release(&ptable.lock);
+
+    return 0;
+}
+
+uint64
+sys_fcfsmode(void)
+{
+    if (scheduler_mode == FCFS_MODE) {
+        printf("Already in FCFS mode.\n");
+        return -1;
+    }
+
+    acquire(&ptable.lock);
+    scheduler_mode = FCFS_MODE;
+
+    for (struct proc *p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if (p->state != UNUSED) {
+            p->priority = -1;
+            p->level = -1;
+            p->time_quantum = -1;
+        }
+    }
+    tick_count = 0; // 글로벌 tick 초기화
+    release(&ptable.lock);
+
+    return 0;
+}
+

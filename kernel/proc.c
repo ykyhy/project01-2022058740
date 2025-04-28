@@ -6,6 +6,11 @@
 #include "proc.h"
 #include "defs.h"
 
+#define FCFS_MODE 0
+#define MLFQ_MODE 1
+
+int scheduler_mode = FCFS_MODE;
+
 struct cpu cpus[NCPU];
 
 struct proc proc[NPROC];
@@ -454,29 +459,108 @@ scheduler(void)
     // processes are waiting.
     intr_on();
 
-    int found = 0;
-    for(p = proc; p < &proc[NPROC]; p++) {
-      acquire(&p->lock);
-      if(p->state == RUNNABLE) {
-        // Switch to chosen process.  It is the process's job
-        // to release its lock and then reacquire it
-        // before jumping back to us.
-        p->state = RUNNING;
-        c->proc = p;
-        swtch(&c->context, &p->context);
+	if (scheduler_mode == FCFS_MODE) {
+      struct proc *earliest = 0;
 
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
-        found = 1;
+      for(p = proc; p < &proc[NPROC]; p++) {
+        acquire(&p->lock);
+        if (p->state == RUNNABLE) {
+          if (earliest == 0 || p->ctime < earliest->ctime) {
+            if (earliest)  // 전에 고른 프로세스 lock은 풀어줘야 함
+              release(&earliest->lock);
+            earliest = p;
+          } else {
+            release(&p->lock);
+          }
+        } else {
+          release(&p->lock);
+        }
       }
-      release(&p->lock);
+
+      if (earliest) {
+        // 실행할 프로세스가 있다면
+        earliest->state = RUNNING;
+        c->proc = earliest;
+        swtch(&c->context, &earliest->context);
+        c->proc = 0;
+        release(&earliest->lock);
+      } else {
+        // 실행할 프로세스가 하나도 없을 때 (found == 0 상황)
+        intr_on();
+        asm volatile("wfi");
+      }
     }
-    if(found == 0) {
-      // nothing to run; stop running on this core until an interrupt.
+	else if (scheduler_mode == MLFQ_MODE) {
+       struct proc *selected = 0;
+
+    // 높은 레벨(L0)부터 낮은 레벨(L2)까지 순서대로 검색
+    for (int level = 0; level <= 2; level++) {
+      for (p = proc; p < &proc[NPROC]; p++) {
+        acquire(&p->lock);
+        if (p->state == RUNNABLE && p->level == level) {
+          selected = p;
+          break;  // 가장 먼저 발견한 RUNNABLE 프로세스 선택
+        }
+        release(&p->lock);
+      }
+      if (selected)
+        break;  // 이미 선택했으면 더 검색할 필요 없음
+    }
+
+    if (selected) {
+      // 실행 직전
+      selected->state = RUNNING;
+      c->proc = selected;
+      swtch(&c->context, &selected->context);
+      c->proc = 0;
+
+      // 실행이 끝난 후
+      // (프로세스가 RUNNABLE로 돌아왔을 때 time_quantum을 관리해야 함)
+      // 이 부분은 yield() 안에서 다룰 수도 있는데, 여기서는 스케줄러에서 관리하는 방식으로 가자
+
+    if (selected->state == RUNNABLE) {
+      selected->time_quantum++;
+
+      // 레벨 별 타임퀀텀 초과 시 레벨 다운
+      if (selected->level == 0 && selected->time_quantum >= 4) {
+        selected->level = 1;
+        selected->time_quantum = 0;
+      } else if (selected->level == 1 && selected->time_quantum >= 8) {
+        selected->level = 2;
+        selected->time_quantum = 0;
+      }
+    }
+    release(&selected->lock);
+    } else {
+      // 실행할 프로세스가 없으면 idle
       intr_on();
       asm volatile("wfi");
     }
+  }
+
+    //int found = 0;
+    //for(p = proc; p < &proc[NPROC]; p++) {
+      //acquire(&p->lock);
+      //if(p->state == RUNNABLE) {
+        // Switch to chosen process.  It is the process's job
+        // to release its lock and then reacquire it
+        // before jumping back to us.
+        //p->state = RUNNING;
+        //c->proc = p;
+        //swtch(&c->context, &p->context);
+
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        //c->proc = 0;
+        //found = 1;
+      //}
+      //release(&p->lock);
+    //}
+    //if(found == 0) {
+      // nothing to run; stop running on this core until an interrupt.
+      //intr_on();
+      //asm volatile("wfi");
+    //}
   }
 }
 
@@ -691,5 +775,5 @@ procdump(void)
       state = "???";
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
-  }
+  //}
 }
