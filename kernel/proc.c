@@ -11,6 +11,8 @@
 
 int scheduler_mode = FCFS_MODE;
 
+int tick_count = 0;
+
 struct cpu cpus[NCPU];
 
 struct proc proc[NPROC];
@@ -453,7 +455,6 @@ scheduler(void)
 {
   struct proc *p;
   struct cpu *c = mycpu();
-  int tick_conut = 0;
 
   c->proc = 0;
   for(;;){
