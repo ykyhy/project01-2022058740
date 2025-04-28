@@ -91,10 +91,11 @@ struct proc {
   int killed;                  // If non-zero, have been killed
   int xstate;                  // Exit status to be returned to parent's wait
   int pid;                     // Process ID
+  uint64 ctime;
   int priority;                // 프로세스 우선순위 (0~3)
   int level;                   // MLFQ 큐 레벨 (0, 1, 2)
   int time_quantum;            // 현재 사용한 시간 퀀텀
-
+  
   // wait_lock must be held when using this:
   struct proc *parent;         // Parent process
 

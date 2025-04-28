@@ -518,16 +518,17 @@ scheduler(void)
       // (프로세스가 RUNNABLE로 돌아왔을 때 time_quantum을 관리해야 함)
       // 이 부분은 yield() 안에서 다룰 수도 있는데, 여기서는 스케줄러에서 관리하는 방식으로 가자
 
-    if (selected->state == RUNNABLE) {
-      selected->time_quantum++;
+      if (selected->state == RUNNABLE) {
+        selected->time_quantum++;
 
-      // 레벨 별 타임퀀텀 초과 시 레벨 다운
-      if (selected->level == 0 && selected->time_quantum >= 4) {
-        selected->level = 1;
-        selected->time_quantum = 0;
-      } else if (selected->level == 1 && selected->time_quantum >= 8) {
-        selected->level = 2;
-        selected->time_quantum = 0;
+        // 레벨 별 타임퀀텀 초과 시 레벨 다운
+        if (selected->level == 0 && selected->time_quantum >= 4) {
+          selected->level = 1;
+          selected->time_quantum = 0;
+        } 
+		else if (selected->level == 1 && selected->time_quantum >= 8) {
+          selected->level = 2;
+          selected->time_quantum = 0;
       }
     }
     release(&selected->lock);
