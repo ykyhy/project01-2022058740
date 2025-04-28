@@ -24,6 +24,11 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int myfunction(char*);
+int yield(void);
+int getlev(void);
+int setpriority(int pid, int priority);
+int mlfqmode(void);
+int fcfsmode(void);
 
 // ulib.c
 int stat(const char*, struct stat*);
