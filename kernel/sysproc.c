@@ -5,6 +5,14 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
+extern int scheduler_mode;
+extern int tick_count;
+extern struct proc proc[NPROC];
+extern struct spinlock ptable_lock;
+
+#define FCFS_MODE 0
+#define MLFQ_MODE 1
+
 
 uint64
 sys_exit(void)
