@@ -136,15 +136,15 @@ sys_setpriority(void)
     if (priority < 0 || priority > 3)
         return -2;
 
-    acquire(&ptable.lock);
+    acquire(&ptable_lock);
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
         if (p->pid == pid) {
             p->priority = priority;
-            release(&ptable.lock);
+            release(&ptable_lock);
             return 0;
         }
     }
-    release(&ptable.lock);
+    release(&ptable_lock);
     return -1;  // 프로세스 못 찾음
 }
 
@@ -156,7 +156,7 @@ sys_mlfqmode(void)
         return -1;
     }
 
-    acquire(&ptable.lock);
+    acquire(&ptable_lock);
     scheduler_mode = MLFQ_MODE;
 
     for (struct proc *p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
@@ -167,7 +167,7 @@ sys_mlfqmode(void)
         }
     }
     tick_count = 0; // 글로벌 tick 초기화
-    release(&ptable.lock);
+    release(&ptable_lock);
 
     return 0;
 }
@@ -180,7 +180,7 @@ sys_fcfsmode(void)
         return -1;
     }
 
-    acquire(&ptable.lock);
+    acquire(&ptable_lock);
     scheduler_mode = FCFS_MODE;
 
     for (struct proc *p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
@@ -191,7 +191,7 @@ sys_fcfsmode(void)
         }
     }
     tick_count = 0; // 글로벌 tick 초기화
-    release(&ptable.lock);
+    release(&ptable_lock);
 
     return 0;
 }
