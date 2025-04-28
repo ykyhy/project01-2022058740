@@ -142,6 +142,7 @@ UPROGS=\
 	$U/_zombie\
 	$U/_my_userapp\
 	$U/_ppid\
+    $U/_test\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
