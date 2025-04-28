@@ -128,24 +128,23 @@ sys_setpriority(void)
     int pid, priority;
     struct proc *p;
 
-    // 인자 받아오기
-    if (argint(0, &pid) < 0 || argint(1, &priority) < 0)
-        return -1;
+    argint(0, &pid);     
+    argint(1, &priority);
 
-    // priority 범위 검사
     if (priority < 0 || priority > 3)
-        return -2;
+        return -2; 
 
     acquire(&ptable_lock);
     for (p = proc; p < &proc[NPROC]; p++) {
         if (p->pid == pid) {
             p->priority = priority;
             release(&ptable_lock);
-            return 0;
+            return 0;  
         }
     }
     release(&ptable_lock);
-    return -1;  // 프로세스 못 찾음
+
+    return -1; 
 }
 
 uint64
