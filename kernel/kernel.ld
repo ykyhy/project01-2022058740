@@ -14,7 +14,7 @@ SECTIONS
     PROVIDE(etext = .);
   }
 
-  . = 0x80001000;  // trampoline 시작 주소 강제 이동
+  . = 0x80001000;
   _trampoline = .;
   .trampsec : {
     *(trampsec)
