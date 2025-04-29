@@ -147,51 +147,51 @@ sys_setpriority(void)
     return -1; 
 }
 
-uint64
-sys_mlfqmode(void)
-{
-    if (scheduler_mode == MLFQ_MODE) {
-        printf("Already in MLFQ mode.\n");
-        return -1;
-    }
+//uint64
+//sys_mlfqmode(void)
+//{
+//    if (scheduler_mode == MLFQ_MODE) {
+//        printf("Already in MLFQ mode.\n");
+//        return -1;
+//    }
 
-    acquire(&ptable_lock);
-    scheduler_mode = MLFQ_MODE;
+//    acquire(&ptable_lock);
+//    scheduler_mode = MLFQ_MODE;
 
-    for (struct proc *p = proc; p < &proc[NPROC]; p++) {
-        if (p->state != UNUSED) {
-            p->priority = 3;
-            p->level = 0;
-            p->time_quantum = 0;
-        }
-    }
-    tick_count = 0; // 글로벌 tick 초기화
-    release(&ptable_lock);
+//    for (struct proc *p = proc; p < &proc[NPROC]; p++) {
+//        if (p->state != UNUSED) {
+//            p->priority = 3;
+//            p->level = 0;
+//            p->time_quantum = 0;
+//        }
+//    }
+//    tick_count = 0; // 글로벌 tick 초기화
+//    release(&ptable_lock);
 
-    return 0;
-}
+//    return 0;
+//}
 
-uint64
-sys_fcfsmode(void)
-{
-    if (scheduler_mode == FCFS_MODE) {
-        printf("Already in FCFS mode.\n");
-        return -1;
-    }
+//uint64
+//sys_fcfsmode(void)
+//{
+//    if (scheduler_mode == FCFS_MODE) {
+//        printf("Already in FCFS mode.\n");
+//        return -1;
+//    }
+//
+//    acquire(&ptable_lock);
+//    scheduler_mode = FCFS_MODE;
 
-    acquire(&ptable_lock);
-    scheduler_mode = FCFS_MODE;
+//    for (struct proc *p = proc; p < &proc[NPROC]; p++) {
+//        if (p->state != UNUSED) {
+//            p->priority = -1;
+//            p->level = -1;
+//            p->time_quantum = -1;
+//        }
+//    }
+//    tick_count = 0; // 글로벌 tick 초기화
+//    release(&ptable_lock);
 
-    for (struct proc *p = proc; p < &proc[NPROC]; p++) {
-        if (p->state != UNUSED) {
-            p->priority = -1;
-            p->level = -1;
-            p->time_quantum = -1;
-        }
-    }
-    tick_count = 0; // 글로벌 tick 초기화
-    release(&ptable_lock);
-
-    return 0;
-}
+//    return 0;
+//}
 
