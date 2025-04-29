@@ -151,12 +151,14 @@ uint64
 sys_mlfqmode(void)
 {
     if (scheduler_mode == MLFQ_MODE) {
-		printf("CPU %d: Switching to MLFQ mode\n", cpuid());
         return -1;
     }
 
     acquire(&ptable_lock);
-    scheduler_mode = MLFQ_MODE;
+
+	printf("CPU %d: Switching to MLFQ mode\n", cpuid());
+    
+	scheduler_mode = MLFQ_MODE;
 
     for (struct proc *p = proc; p < &proc[NPROC]; p++) {
         if (p->state != UNUSED) {
@@ -175,7 +177,6 @@ uint64
 sys_fcfsmode(void)
 {
     if (scheduler_mode == FCFS_MODE) {
-		printf("CPU %d: Switching to FCFS mode\n", cpuid());
         return -1;
     }
 
