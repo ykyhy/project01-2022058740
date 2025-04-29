@@ -20,7 +20,8 @@ struct proc proc[NPROC];
 struct proc *initproc;
 
 int nextpid = 1;
-struct spinlock pid_lock;
+struct spinlock pid_lock
+struct spinlock ptable_lock;;
 
 extern void forkret(void);
 static void freeproc(struct proc *p);
