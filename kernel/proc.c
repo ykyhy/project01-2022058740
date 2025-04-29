@@ -531,14 +531,18 @@ scheduler(void)
       if (selected->state == RUNNABLE) {
         selected->time_quantum++;
         // 레벨 별 타임퀀텀 초과 시 레벨 다운
-        if (selected->level == 0 && selected->time_quantum >= 4) {
-          selected->level = 1;
-          selected->time_quantum = 0;
+        if (selected->level == 0 && selected->time_quantum >= 1) {
+            selected->level = 1;
+            selected->time_quantum = 0;
         } 
-		else if (selected->level == 1 && selected->time_quantum >= 8) {
-          selected->level = 2;
-          selected->time_quantum = 0;
-      }
+		else if (selected->level == 1 && selected->time_quantum >= 3) {
+            selected->level = 2;
+            selected->time_quantum = 0;
+        }
+		else if (selected->level == 2 && selected->time_quantum >= 5) {
+            selected->time_quantum = 0;
+	    }
+
     }
     release(&selected->lock);
     } else {
