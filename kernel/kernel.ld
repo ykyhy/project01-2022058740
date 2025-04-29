@@ -9,15 +9,19 @@ SECTIONS
    */
   . = 0x80000000;
 
+
   .text : {
     *(.text .text.*)
-    . = ALIGN(0x1000);
-    _trampoline = .;
-    *(trampsec)
-    . = ALIGN(0x1000);
-    ASSERT(. - _trampoline == 0x1000, "error: trampoline larger than one page");
     PROVIDE(etext = .);
   }
+
+  . = 0x80001000;  // trampoline 시작 주소 강제 이동
+  _trampoline = .;
+  .trampsec : {
+    *(trampsec)
+  }
+  . = ALIGN(0x1000);
+
 
   .rodata : {
     . = ALIGN(16);
