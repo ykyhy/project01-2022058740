@@ -151,7 +151,6 @@ uint64
 sys_mlfqmode(void)
 {
     if (scheduler_mode == MLFQ_MODE) {
-        printf("Already in MLFQ mode.\n");
         return -1;
     }
 
@@ -175,7 +174,6 @@ uint64
 sys_fcfsmode(void)
 {
     if (scheduler_mode == FCFS_MODE) {
-        printf("Already in FCFS mode.\n");
         return -1;
     }
 
