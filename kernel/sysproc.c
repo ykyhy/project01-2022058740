@@ -117,7 +117,7 @@ uint64
 sys_getlev(void)
 {
     struct proc *p = myproc();
-    if (scheduler_mode == FCFS_MODE)  // FCFS_MODE는 define해놓거나 0으로 설정
+    if (scheduler_mode == FCFS_MODE)
         return 99;
     return p->level;
 }
@@ -151,6 +151,7 @@ uint64
 sys_mlfqmode(void)
 {
     if (scheduler_mode == MLFQ_MODE) {
+		printf("CPU %d: Switching to MLFQ mode\n", cpuid());
         return -1;
     }
 
@@ -174,6 +175,7 @@ uint64
 sys_fcfsmode(void)
 {
     if (scheduler_mode == FCFS_MODE) {
+		printf("CPU %d: Switching to FCFS mode\n", cpuid());
         return -1;
     }
 
